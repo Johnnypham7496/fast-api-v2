@@ -5,7 +5,7 @@ from fastapi import FastAPI, Response, status
 app = FastAPI(
     title="Justice Leagues FastAPI",
     description="This is the swagger page for Justice Leagues FastAPI",
-    version=1.0.0
+    version='1.0.0'
 )
 
 
