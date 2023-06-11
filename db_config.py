@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 # resource: https://fastapi.tiangolo.com/tutorial/sql-databases/
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./db/database.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./db/local_sqlite/database.db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 
