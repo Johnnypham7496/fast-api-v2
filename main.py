@@ -2,7 +2,7 @@ import uvicorn
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Response, status, Depends
 from db_config import engine, get_db
-from repository import users_repository
+from repository import user_repository
 from db import user_db
 from router import app_router, users_router
 from fastapi import APIRouter
