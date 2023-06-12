@@ -4,7 +4,7 @@ from fastapi import FastAPI, Response, status, Depends
 from db_config import engine, get_db
 from repository import users_repository
 from db import user_db
-from router import app_router
+from router import app_router, users_router
 from fastapi import APIRouter
 
 
@@ -16,6 +16,7 @@ app = FastAPI(
 
 
 app.include_router(app_router.router)
+app.include_router(users_router.router)
 
 
 # @app.get("/dbsetup")
