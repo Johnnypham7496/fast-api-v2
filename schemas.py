@@ -23,5 +23,5 @@ class CreateUserModel(BaseModel):
 
 
 class UpdateUserModel(BaseModel):
-    email = Optional['str']
-    role = Optional['str']
+    email: Optional[str]
+    role: Optional[str]
