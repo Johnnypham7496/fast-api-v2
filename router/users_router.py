@@ -63,7 +63,7 @@ def create_user(request: CreateUserModel, response: Response, db: Session = Depe
     
 
     response.status_code = status.HTTP_201_CREATED
-    response.headers['Location'] = '/users/v1' + str(username_request.strip())
+    response.headers['Location'] = f'http://localhost:8000/users/v1/{username_request.strip()}'
     return user_repository.add_user(db, username_request.strip(), email_request.strip(), role_request.strip())
 
 

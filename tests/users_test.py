@@ -1,6 +1,7 @@
 import sys
 import os
 import pytest
+import json
 from typing import Any
 from typing import Generator
 from fastapi import FastAPI
@@ -111,11 +112,121 @@ def test_tc0002_get_by_username(client):
     assert response.json()['role'] == td_role
 
 
-def test_0003_get_username_not_exist(client):
+def test_tc0003_get_username_not_exist(client):
     td_username = 'no.data'
     td_message = 'username not found. Please check your parameter and try again'
 
     response = client.get(f'/users/v1/{td_username}')
 
     assert response.status_code == 404
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0004_post_add_user(client):
+    td_username = 'robin'
+    td_email = 'dick.grayson@gmail.com'
+    td_role = 'sidekick'
+    td_header = 'http://localhost:8000/users/v1/robin'
+
+    response = client.post(f'/users/v1', data=json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+    assert response.status_code == 201
+    assert response.json()['username'] == td_username
+    assert response.json()['email'] == td_email
+    assert response.json()['role'] == td_role
+    assert response.headers['location'] == td_header
+
+    get_response = client.get(f'/users/v1/{td_username}')
+
+    assert get_response.json()['username'] == td_username
+    assert get_response.json()['email'] == td_email
+    assert get_response.json()['role'] == td_role
+
+
+def test_tc0005_post_existing_username(client):
+    td_username = 'darth.vader'
+    td_email = ''
+    td_role = ''
+    td_message = 'username already exists. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 409
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0005_post_existing_email(client):
+    td_username = ''
+    td_email = 'darth.vader@gmail.com'
+    td_role = ''
+    td_message = 'email already exists. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 409
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0005_post_empty_username(client):
+    td_username = ''
+    td_email = ''
+    td_role = ''
+    td_message = 'username field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0005_post_empty_email(client):
+    td_username = 'test.username'
+    td_email = ''
+    td_role = ''
+    td_message = 'email field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0005_post_empty_role(client):
+    td_username = 'test.username'
+    td_email = 'test@gmail.com'
+    td_role = ''
+    td_message = 'role field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
     assert response.json()['detail'] == td_message
