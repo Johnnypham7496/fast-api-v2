@@ -26,8 +26,20 @@ def add_user(db: Session, _username, _email, _role):
     return new_user
 
 
-
 def add_user_td(db: Session):
     add_user(db, "darth.vader", "darth.vader@gmail.com", "villain")
     add_user(db, "super.man", "superman@gmail.com", "hero")
     add_user(db, "thor", "thor.odinson@gmail.com", "hero")
+
+
+def update_user(db: Session, _username, _email, _role):
+    user_to_update = db.query(UserDb).filter(UserDb.username== _username).first()
+
+    if _email != '':
+        user_to_update.email = _email
+
+    if _role != '':
+        user_to_update.role = _role
+
+    db.commit()
+    
