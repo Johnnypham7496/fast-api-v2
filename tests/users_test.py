@@ -1,6 +1,7 @@
 import sys
 import os
 import pytest
+import json
 from typing import Any
 from typing import Generator
 from fastapi import FastAPI
@@ -111,11 +112,218 @@ def test_tc0002_get_by_username(client):
     assert response.json()['role'] == td_role
 
 
-def test_0003_get_username_not_exist(client):
+def test_tc0003_get_username_not_exist(client):
     td_username = 'no.data'
     td_message = 'username not found. Please check your parameter and try again'
 
     response = client.get(f'/users/v1/{td_username}')
 
     assert response.status_code == 404
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0004_post_add_user(client):
+    td_username = 'robin'
+    td_email = 'dick.grayson@gmail.com'
+    td_role = 'sidekick'
+    td_header = 'http://localhost:8000/users/v1/robin'
+
+    response = client.post(f'/users/v1', data=json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+    assert response.status_code == 201
+    assert response.json()['username'] == td_username
+    assert response.json()['email'] == td_email
+    assert response.json()['role'] == td_role
+    assert response.headers['location'] == td_header
+
+    get_response = client.get(f'/users/v1/{td_username}')
+
+    assert get_response.json()['username'] == td_username
+    assert get_response.json()['email'] == td_email
+    assert get_response.json()['role'] == td_role
+
+
+def test_tc0005_post_existing_username(client):
+    td_username = 'darth.vader'
+    td_email = ''
+    td_role = ''
+    td_message = 'username already exists. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 409
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0006_post_existing_email(client):
+    td_username = ''
+    td_email = 'darth.vader@gmail.com'
+    td_role = ''
+    td_message = 'email already exists. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 409
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0007_post_empty_username(client):
+    td_username = ''
+    td_email = ''
+    td_role = ''
+    td_message = 'username field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0008_post_empty_email(client):
+    td_username = 'test.username'
+    td_email = ''
+    td_role = ''
+    td_message = 'email field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0009_post_empty_role(client):
+    td_username = 'test.username'
+    td_email = 'test@gmail.com'
+    td_role = ''
+    td_message = 'role field cannot be empty. Please check your payload and try again'
+
+    response = client.post('/users/v1/', data= json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0010_put(client):
+    td_id = 1
+    td_username = 'darth.vader'
+    td_email = 'test@gmail.com'
+    td_role = 'test role'
+    td_payload = '{"email": "test@gmail.com", "role": "test role"}'
+    td_headers = 'user information updated successfully'
+
+    response = client.put(f"/users/v1/{td_username}", data= td_payload, content='application/json')
+
+    assert response.status_code == 204
+    assert response.headers['message'] == td_headers
+
+    get_response = client.get(f'/users/v1/{td_username}')
+
+    assert get_response.status_code == 200
+    assert get_response.json()['id'] == td_id
+    assert get_response.json()['username'] == td_username
+    assert get_response.json()['email'] == td_email
+    assert get_response.json()['role'] == td_role
+
+
+def test_tc0011_put_update_email(client):
+    td_id = 2
+    td_username = 'bruce.wayne'
+    td_email = 'robin@gmail.com'
+    td_role = 'hero'
+    td_payload = '{"email": "robin@gmail.com"}'
+    td_headers = 'user information updated successfully'
+
+    response = client.put(f"/users/v1/{td_username}", data= td_payload, content= 'application/json')
+
+    assert response.status_code == 204
+    assert response.headers['message'] == td_headers
+
+    get_response = client.get(f'/users/v1/{td_username}')
+
+    assert get_response.status_code == 200
+    assert get_response.json()['id'] == td_id
+    assert get_response.json()['username'] == td_username
+    assert get_response.json()['email'] == td_email
+    assert get_response.json()['role'] == td_role
+
+
+def test_tc0012_put_update_role(client):
+    td_id = 3
+    td_username = 'captain.america'
+    td_email =  'captain.america@gmail.com'
+    td_role = 'villain'
+    td_payload = '{"role": "villain"}'
+
+
+    response = client.put('/users/v1/' + td_username, data= td_payload, content= 'application/json')
+
+    assert response.status_code == 204
+
+    get_response = client.get(f'/users/v1/{td_username}')
+
+    assert get_response.json()['id'] == td_id
+    assert get_response.json()['username'] == td_username
+    assert get_response.json()['email'] == td_email
+    assert get_response.json()['role'] == td_role
+
+
+def test_tc0013_put_no_body(client):
+    td_username = 'darth.vader'
+    td_payload = '{}'
+    td_message = 'request body cannot be empty. Please check your payload and try again'
+
+    response = client.put(f'/users/v1/{td_username}', data= td_payload, content= 'application/json')
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0014_put_bad_username(client):
+    td_username = 'this.is.bad'
+    td_payload = '{"email": "test@gmail.com", "role": "test_role"}'
+    td_message = 'username not found. Please use Post to create a user record'
+
+    response = client.put(f'/users/v1/{td_username}', data= td_payload, content= 'application/json')
+
+    assert response.status_code == 404
+    assert response.json()['detail'] == td_message
+
+
+def test_tc0015_put_empty_fields(client):
+    td_username = 'darth.vader'
+    td_payload = '{"email": "", "role": ""}'
+    td_message = 'request body fields cannot be empty. Please check your payload and try again'
+
+    response = client.put(f'/users/v1/{td_username}', data= td_payload, content= 'application/json')
+
+    assert response.status_code == 400
     assert response.json()['detail'] == td_message
