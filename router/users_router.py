@@ -109,7 +109,7 @@ def delete_user(username: str, response: Response, db: Session = Depends(get_db)
     return_value = user_repository.get_by_username(db, username)
 
     if return_value == None:
-        response_text = 'username not found. Please check you parameter and try again.'
+        response_text = 'username not found. Please check your parameter and try again.'
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=response_text)
     
     response.headers['message'] = 'User deleted successfully'
