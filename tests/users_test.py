@@ -327,3 +327,43 @@ def test_tc0015_put_empty_fields(client):
 
     assert response.status_code == 400
     assert response.json()['detail'] == td_message
+
+
+def test_tc0016_delete_user(client):
+    td_username = 'james.bond'
+    td_email = 'bond@gmail.com'
+    td_role = 'spy'
+    td_headers = 'User deleted successfully'
+    td_message = 'username not found. Please check your parameter and try again'
+
+    response = client.post("/users/v1", data=json.dumps(dict(
+        username = td_username,
+        email = td_email,
+        role = td_role
+    )), content= 'application/json')
+
+    assert response.status_code == 201
+
+    get_user = client.get(f'/users/v1/{td_username}')
+    assert get_user.status_code == 200
+    assert get_user.json()['username'] == td_username
+    assert get_user.json()['email'] == td_email
+    assert get_user.json()['role'] == td_role
+
+    response = client.delete(f'/users/v1/{td_username}')
+    assert response.status_code == 204
+    assert response.headers['message'] == td_headers
+
+    get_delete_user = client.get(f'/users/v1/{td_username}')
+    assert get_delete_user.status_code == 404
+    assert get_delete_user.json()['detail'] == td_message
+
+
+def test_tc0017_delete_non_existing_user(client):
+    td_username = 'no.user'
+    td_message = 'username not found. Please check your parameter and try again.'
+
+    response = client.delete(f'/users/v1/{td_username}')
+
+    assert response.status_code == 404
+    assert response.json()['detail'] == td_message
