@@ -7,8 +7,8 @@ def rest_call_to_outside_api():
     chuck_url = 'https://api.chucknorris.io/jokes/random'
     record_index = 0
 
-    cat_response = requests.get(cats_url).content
-    chuck_response = requests.get(chuck_url).content
+    cat_response = requests.get(cats_url, timeout=60).content
+    chuck_response = requests.get(chuck_url, timeout=60).content
 
 
     # convert string to json
